@@ -67,7 +67,7 @@ class UsersController extends UsersAppController {
  */
 	public function beforeFilter() {
 		parent::beforeFilter();
-		$this->Auth->allow('add', 'reset', 'verify', 'logout', /*'index',*/ 'view', 'reset_password', 'session');
+		$this->Auth->allow('add', 'reset', 'verify', 'logout', 'index', 'view', 'reset_password', 'session');
 
 		if ($this->action == 'add') {
 			$this->Auth->enabled = false;
@@ -89,41 +89,13 @@ class UsersController extends UsersAppController {
 	}
 
 /**
- * List of all users
- *
- * @return void
+ *  redirect to dashboard
+ *  @return void
  */
 	public function index() {
-		//$this->User->contain('Detail');
-		$searchTerm = '';
-		$this->Prg->commonProcess($this->modelClass, $this->modelClass, 'index', false);
-
-		if (!empty($this->params['named']['search'])) {
-			if (!empty($this->params['named']['search'])) {
-				$searchTerm = $this->params['named']['search'];
-			}
-			$this->data[$this->modelClass]['search'] = $searchTerm;
-		}
-
-		$this->paginate = array(
-			'search',
-			'limit' => 12,
-			'order' => $this->modelClass . '.username ASC',
-			'by' => $searchTerm,
-			'conditions' => array(
-				$this->modelClass . '.active' => 1, 
-				$this->modelClass . '.email_authenticated' => 1
-			)
-		);
-
-		$this->set('users', $this->paginate($this->modelClass));
-		$this->set('searchTerm', $searchTerm);
-
-		if (!isset($this->params['named']['sort'])) {
-			$this->params['named']['sort'] = 'username';
-		}
+		$this->redirect(array('action'=>'dashboard'));
 	}
-
+	
 /**
  * The homepage of a users giving him an overview about everything
  *
@@ -155,7 +127,7 @@ class UsersController extends UsersAppController {
  * @param string $id User ID
  * @return void
  */
-	public function edit() {
+	public function edit($slug) {
 		if (!empty($this->data)) {
 			if ($this->User->Detail->saveSection($this->Auth->user('id'), $this->data, 'User')) {
 				$this->Session->setFlash(__d('users', 'Profile saved.', true));
@@ -163,9 +135,17 @@ class UsersController extends UsersAppController {
 				$this->Session->setFlash(__d('users', 'Could not save your profile.', true));
 			}
 		} else {
+			try {
+				$this->data = $this->User->view($slug);
+				if($this->Auth->user('slug') != $this->data[$this->modelClass]['slug']){
+					$this->redirect('/');
+				}
+			} catch (Exception $e) {
+				$this->Session->setFlash($e->getMessage());
+				$this->redirect('/');
+			}
 			$this->data = $this->User->read(null, $this->Auth->user('id'));
 		}
-
 		$this->_setLanguages();
 	}
 
@@ -434,7 +414,7 @@ class UsersController extends UsersAppController {
 			$this->data[$this->modelClass]['id'] = $this->Auth->user('id');
 			if ($this->User->changePassword($this->data)) {
 				$this->Session->setFlash(__d('users', 'Your password was successfully changed.', true));
-				$this->redirect('/');
+				$this->redirect(array('action' => 'dashboard'));
 			}
 		}
 	}
