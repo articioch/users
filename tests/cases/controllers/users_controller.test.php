@@ -11,7 +11,7 @@
 
 App::import('Controller', 'Users.Users');
 App::import('Model', 'Users.User');
-App::import('Component', array('Auth', 'Cookie', 'Session'));
+App::import('Component', array('Users.UsersAuth', 'Cookie', 'Session'));
 
 /**
  * TestUsersController
@@ -105,10 +105,16 @@ class UsersControllerTestCase extends CakeTestCase {
  */
 	public function startTest() {
 		Configure::write('App.UserClass', null);
-		$this->Users = new TestUsersController();
+
+		$request = new CakeRequest(null, false);
+		$this->Users = new TestUsersController($request);
 		$this->Users->constructClasses();
-		$this->Users->Component->init($this->Users);
-		$this->Users->Component->initialize($this->Users);
+		//$this->Users->Components->init($this->Users);
+		$this->Users->Components->trigger(
+			'initialize', array(&$this->Users), array('triggerDisabled' => true)
+		);
+		//$this->Users->AuthUser->initialize($this->Users);
+		/*
 		$this->Users->params = array(
 			'pass' => array(),
 			'named' => array(),
@@ -116,6 +122,7 @@ class UsersControllerTestCase extends CakeTestCase {
 			'admin' => false,
 			'plugin' => 'users',
 			'url' => array());
+		*/
 		$this->Users->Email->delivery = 'debug';
 	}
 
@@ -134,8 +141,10 @@ class UsersControllerTestCase extends CakeTestCase {
  * @return void
  */
 	public function testUserLogin() {
-		$this->Users->params['action'] = 'login';
-		$this->Users->Component->startup($this->Users);
+		$this->Users->request['action'] = 'login';
+		$this->Users->Components->trigger(
+			'startup', array(&$this->Users), array('triggerDisabled' => true)
+		);
 
 		$this->Users->User->save(array(
 			'User' => array(
@@ -147,7 +156,7 @@ class UsersControllerTestCase extends CakeTestCase {
 
 		$this->__setPost(array('User' => $this->usersData['admin']));
  		$this->Users->beforeFilter();
-		$this->Users->params = array(
+		$this->Users->parrequestams = array(
 			'controller' => 'users',
 			'action' => 'login',
 			'admin' => false,

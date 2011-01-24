@@ -23,7 +23,7 @@ class DetailTestCase extends CakeTestCase {
  * @var object
  */
 	public $Detail = null;
-	
+
 /**
  * Fixtures
  *
@@ -39,10 +39,10 @@ class DetailTestCase extends CakeTestCase {
  *
  * @return void
  */
-	public function start() {
+	public function setUp() {
 		Configure::write('App.UserClass', null);
-		parent::start();
-		$this->Detail =& ClassRegistry::init('Users.Detail');
+		parent::setUp();
+		$this->Detail = ClassRegistry::init('Users.Detail');
 	}
 
 /**

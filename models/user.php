@@ -92,20 +92,7 @@ class User extends UsersAppModel {
 	public function __construct($id = false, $table = null, $ds = null) {
 		parent::__construct($id, $table, $ds);
 		$this->validate = array(
-			'username' => array(
-				'required' => array(
-					'rule' => array('notEmpty'),
-					'required' => true, 'allowEmpty' => false,
-					'message' => __d('users', 'Please enter a username', true)),
-				'alpha' => array(
-					'rule'=>array('alphaNumeric'), 
-					'message' => __d('users', 'The username must be alphanumeric', true)),
-				'unique_username' => array(
-					'rule'=>array('isUnique','username'),
-					'message' => __d('users', 'This username is already in use.', true)),
-				'username_min' => array(
-					'rule' => array('minLength', '3'),
-					'message' => __d('users', 'The username must have at least 3 characters.', true))),
+
 			'email' => array(
 				'isValid' => array(
 					'rule' => 'email',
@@ -257,8 +244,9 @@ class User extends UsersAppModel {
 		if (!empty($userId)) {
 			$this->id = $userId;
 		}
+
 		if ($this->exists()) {
-			return $this->saveField('last_activity', date('Y-m-d H:i:s', time()));
+			return $this->saveField('last_activity', date('Y-m-d H:i:s'));
 		}
 		return false;
 	}
@@ -549,7 +537,7 @@ class User extends UsersAppModel {
 				$query['search'] = '';
 			}
 
-			$db =& ConnectionManager::getDataSource($this->useDbConfig);
+			$db = $this->getDataSource();
 			$by = $query['by'];
 			$search = $query['search'];
 			$byQuoted = $db->value($search);

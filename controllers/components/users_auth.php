@@ -116,16 +116,19 @@ class UsersAuthComponent extends AuthComponent {
  * @return boolean True if login is successful
  */
 	public function login($data = null, $skipCookies = false) {
+		debug('called');
+		debug(var_dump(parent::login($data)));
 		$loggedIn = 
 			parent::login($data) || (
 				!$skipCookies &&
 				$this->_getCookie()
 			);
+			debug('called');
 		if ($loggedIn) {
 			$User = $this->getModel();
 			$User->id = $this->user($User->primaryKey);
 			$User->saveField('last_login', date('Y-m-d H:i:s'));
-
+debug('called');
 			$this->Session->setFlash(sprintf(__d('users', '%s, you have successfully logged in.', true), $this->user('username')));
 			if (!empty($this->data)) {
 				!$skipCookies && $this->_setCookie();
@@ -152,7 +155,7 @@ class UsersAuthComponent extends AuthComponent {
 	protected function _setupCookies() {
 		// Allow only specified values set on the cookie
 		$validProperties = array('domain', 'key', 'name', 'path', 'secure', 'time');
-		$options = array_intersect_key($this->cookieOptions, array_flip($validProperties));
+		$options = array_intersect_key((array)$this->cookieOptions, array_flip($validProperties));
 		foreach ($options as $key => $value) {
 			$this->Cookie->{$key} = $value;
 		}
@@ -167,6 +170,7 @@ class UsersAuthComponent extends AuthComponent {
  * @link http://api13.cakephp.org/class/cookie-component
  */
 	protected function _setCookie() {
+		debug('called');
 		$this->_setupCookies();
 		list($plugin, $model) = pluginSplit($this->userModel);
 		if (!isset($this->data[$model]['remember_me']) || !$this->data[$model]['remember_me']) {

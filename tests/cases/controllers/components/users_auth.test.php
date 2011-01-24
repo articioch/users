@@ -29,6 +29,13 @@ class UsersAuthTestController extends Controller {
 	);
 
 /**
+ * Models
+ *
+ * @var array
+ */
+	public $uses = array('Users.User');
+
+/**
  * Empty login function
  *
  * @return void
@@ -57,6 +64,12 @@ class UsersAuthTestController extends Controller {
  * @subpackage users.tests.cases.controllers.components
  */
 class UsersAuthTestCase extends CakeTestCase {
+/**
+ * Fixtures
+ *
+ * @var array
+ */
+	public $fixtures = array('plugin.users.user');
 
 /**
  * Setup for testing
@@ -64,19 +77,13 @@ class UsersAuthTestCase extends CakeTestCase {
  * @return void
  */
 	public function setUp() {
-		$this->User = ClassRegistry::init('Users.User');
-		$this->Users = new UsersAuthTestController();
-		$this->Users->Component->init($this->Users);
-		$this->Users->Component->initialize($this->Users);
-		$this->Users->beforeFilter();
-		ClassRegistry::addObject('view', new View($this->Users));
+		$request = new CakeRequest('users_auth_test/login');
+		$response = new CakeResponse(); 
+		$this->Users = new UsersAuthTestController($request, $response);
+		$this->Users->constructClasses();
+
 		$this->Users->Session->delete('Auth');
 		$this->Users->Session->delete('Message.auth');
-
-		$this->Users->params = Router::parse('users_auth_test/login');
-		$this->Users->params['url']['url'] = 'users_auth_test/login';
-		
-		$this->Users->Auth->startup($this->Users);
 
 		Router::reload();
 	}
@@ -98,18 +105,19 @@ class UsersAuthTestCase extends CakeTestCase {
  * @return void
  */
 	public function testSetCookie() {
-		$this->Users->data = array(
+		$this->Users->request->params['action'] = 'login';
+		$this->Users->request->data = array(
 			'User' => array(
 				'remember_me' => 1,
-				'username' => 'test',
-				'password' => 'testtest'
-			)
-		);
+				'email' => 'larry.masters@cakedc.com',
+				'passwd' => 'test'));
+
+		$this->Users->startupProcess();
 		$this->Users->Auth->login();
-//		$this->Users->Cookie->name = 'userTestCookie';
+
 		$result = $this->Users->Cookie->read('User');
 		$this->assertEqual($result, array(
-			'username' => 'test',
-			'password' => 'testtest'));
+			'email' => 'larry.masters@cakedc.com',
+			'passwd' => 'test'));
 	}
 }

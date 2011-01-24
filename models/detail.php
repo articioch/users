@@ -232,7 +232,10 @@ class Detail extends UsersAppModel {
 							$toSave[$model]['user_id'] = $userId;
 						}
 					}
-					$this->{$model}->save($toSave, false);
+
+					debug(var_dump($this->{$model}->save($toSave, array(
+						'validate' => false))));
+					debug($this->{$model}->invalidFields());
 				}
 			}
 		}

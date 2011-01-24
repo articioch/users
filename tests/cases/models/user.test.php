@@ -44,7 +44,7 @@ class UserTestCase extends CakeTestCase {
  *
  * @return void
  */
-	public function startTest() {
+	public function setUp() {
 		Configure::write('App.UserClass', null);
 		$this->User = ClassRegistry::init('Users.User');
 	}
@@ -54,7 +54,7 @@ class UserTestCase extends CakeTestCase {
  *
  * @return void
  */
-	public function endTest() {
+	public function tearDown() {
 		unset($this->User);
 		ClassRegistry::flush(); 
 	}
@@ -104,7 +104,8 @@ class UserTestCase extends CakeTestCase {
  */
 	function testGenerateToken() {
 		$result = $this->User->generateToken();
-		$this->assertIsA($result, 'string');
+		$this->assertTrue(is_string($result));
+		$this->assertEquals(strlen($result), 10);
 	}
 
 /**
@@ -118,7 +119,7 @@ class UserTestCase extends CakeTestCase {
 
 		$now = strtotime('2008-03-25 02:48:46');
 		$result = $this->User->validateToken('testtoken2', false, $now);
-		$this->assertIsA($result, 'array');
+		$this->assertTrue(is_array($result));
 
 		$now = strtotime('2008-03-29 02:48:46');
 		$result = $this->User->validateToken('testtoken2', false, $now);
@@ -126,7 +127,7 @@ class UserTestCase extends CakeTestCase {
 	}
 
 /**
- * 
+ * testUpdateLastActivity
  *
  * @return void
  */
@@ -134,14 +135,15 @@ class UserTestCase extends CakeTestCase {
 		$id = '1';
 		$this->User->id = $id;
 		$lastDate = $this->User->field('last_activity');
-		$this->User->updateLastActivity($id);
+		$result = $this->User->updateLastActivity($id);
+		$this->assertTrue($result);
 		$newDate = $this->User->field('last_activity');
 		$this->assertTrue($lastDate < $newDate);
 		$this->assertFalse($this->User->updateLastActivity('invalid-id!'));
 	}
 
 /**
- * 
+ * testResetPassword
  *
  * @return void
  */
@@ -171,7 +173,7 @@ class UserTestCase extends CakeTestCase {
 	}
 
 /**
- * 
+ * testCheckPasswordToken
  *
  * @return void
  */
@@ -183,7 +185,7 @@ class UserTestCase extends CakeTestCase {
 	}
 
 /**
- * 
+ * testPasswordReset
  *
  * @return void
  */
@@ -205,7 +207,7 @@ class UserTestCase extends CakeTestCase {
 	}
 
 /**
- * 
+ * testValidateOldPassword
  *
  * @return void
  */
@@ -223,7 +225,7 @@ class UserTestCase extends CakeTestCase {
 	}
 
 /**
- * 
+ * testView
  *
  * @return void
  */
@@ -370,12 +372,12 @@ class UserTestCase extends CakeTestCase {
  */
 	public function testGeneratePassword() {
 		$result = $this->User->generatePassword();
-		$this->assertIsA($result, 'string');
+		$this->assertTrue(is_string($result));
 		$this->assertEqual(strlen($result), 10);
 
 
 		$result = $this->User->generatePassword(15);
-		$this->assertIsA($result, 'string');
+		$this->assertTrue(is_string($result));
 		$this->assertEqual(strlen($result), 15);
 	}
 
